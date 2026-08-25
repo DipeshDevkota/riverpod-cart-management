@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
-void main()
-{
+void main() {
   runApp(const myApp());
 }
 
@@ -10,62 +9,82 @@ class myApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-     return MaterialApp(
-      home: CounterPage(),
-     );
-    
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: const MainPage(),
+    );
   }
 }
 
-class CounterPage extends StatefulWidget {
-  const CounterPage({super.key});
+class MainPage extends StatefulWidget {
+  const MainPage({super.key});
 
   @override
+  State<MainPage> createState() => _MainPageState();
+}
 
-  State<StatefulWidget> createState() {
+class _MainPageState extends State<MainPage> {
+  int currentIndex = 0;
 
-    return _CounterPageState();
+  final List<Widget> pages = [
+    const HomePage(),
+    const SearchPage(),
+    const ProfilePage(),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: pages[currentIndex],
+
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: currentIndex,
+
+        onTap: (index) {
+          setState(() {
+            currentIndex = index;
+          });
+        },
+
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
+          BottomNavigationBarItem(icon: Icon(Icons.search), label: "Search"),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
+        ],
+      ),
+    );
   }
 }
 
-class _CounterPageState extends State<CounterPage> {
-  
-  int count = 0;
+class HomePage extends StatelessWidget {
+  const HomePage({super.key});
 
-  @override 
+  @override
   Widget build(BuildContext context) {
-      return Scaffold(
-        body:Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                "$count",
-                style: const TextStyle(
-                  fontSize: 40,
-                ),
-              ),
-
-              ElevatedButton(onPressed: (){
-
-                setState(() {
-                  count++;
-                });
-              }, 
-              child: const Text("Increase"),
-               ),
-
-
-
-            ],
-
-          ),
-        ),
-      );
-
+    return const Center(
+      child: Text("Home Page", style: TextStyle(fontSize: 30)),
+    );
   }
+}
 
+class SearchPage extends StatelessWidget {
+  const SearchPage({super.key});
 
+  @override
+  Widget build(BuildContext context) {
+    return const Center(
+      child: Text("Search Page", style: TextStyle(fontSize: 30)),
+    );
+  }
+}
 
+class ProfilePage extends StatelessWidget {
+  const ProfilePage({super.key});
 
+  @override
+  Widget build(BuildContext context) {
+    return const Center(
+      child: Text("Profile Page", style: TextStyle(fontSize: 30)),
+    );
+  }
 }
