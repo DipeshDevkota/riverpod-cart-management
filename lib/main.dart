@@ -1,51 +1,71 @@
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(myApp());
+void main()
+{
+  runApp(const myApp());
 }
 
 class myApp extends StatelessWidget {
+  const myApp({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(title: Text("My Profile")),
-        body: Padding(
-          padding: EdgeInsets.all(20),
+     return MaterialApp(
+      home: CounterPage(),
+     );
+    
+  }
+}
+
+class CounterPage extends StatefulWidget {
+  const CounterPage({super.key});
+
+  @override
+
+  State<StatefulWidget> createState() {
+
+    return _CounterPageState();
+  }
+}
+
+class _CounterPageState extends State<CounterPage> {
+  
+  int count = 0;
+
+  @override 
+  Widget build(BuildContext context) {
+      return Scaffold(
+        body:Center(
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                "Welcome",
-                style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+                "$count",
+                style: const TextStyle(
+                  fontSize: 40,
+                ),
               ),
-              SizedBox(height: 20),
-              Row(
-                children: [
-                  Icon(Icons.person),
-                  SizedBox(width: 10),
 
-                  Row(
-                    children: [
-                      Icon(Icons.email),
-                      SizedBox(width: 10),
-                      Text('abc@example.com'),
-                    ],
-                  ),
+              ElevatedButton(onPressed: (){
 
-                  SizedBox(height: 30),
-                  ElevatedButton(
-                    onPressed: () {
-                      print("Profile Button Clicked");
-                    },
-                    child: Text("View Profile"),
-                  ),
-                ],
-              ),
+                setState(() {
+                  count++;
+                });
+              }, 
+              child: const Text("Increase"),
+               ),
+
+
+
             ],
+
           ),
         ),
-      ),
-    );
+      );
+
   }
+
+
+
+
 }
