@@ -1,90 +1,93 @@
-import 'package:flutter/material.dart';
+import "package:flutter/material.dart";
+import "package:shared_preferences/shared_preferences.dart";
 
-void main() {
+void main()
+{
   runApp(const myApp());
+
 }
 
-class myApp extends StatelessWidget {
+class myApp extends StatelessWidget{
   const myApp({super.key});
 
   @override
   Widget build(BuildContext context) {
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: const MainPage(),
+      home:const HomePage(),
     );
+    
   }
 }
 
-class MainPage extends StatefulWidget {
-  const MainPage({super.key});
+
+class HomePage extends StatefulWidget{
+  const HomePage({super.key});
 
   @override
-  State<MainPage> createState() => _MainPageState();
+  State<HomePage> createState() => _HomePageState();
+    
+  
 }
 
-class _MainPageState extends State<MainPage> {
-  int currentIndex = 0;
+class _HomePageState extends State<HomePage> {
+  final TextEditingController nameController = TextEditingController();
 
-  final List<Widget> pages = [
-    const HomePage(),
-    const SearchPage(),
-    const ProfilePage(),
-  ];
+  String username = "";
+
+  Future<void> saveName() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    await prefs.setString(
+      "username", 
+      nameController.text,
+      );
+
+    setState(() {
+      username= nameController.text;
+    });
+  } 
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: pages[currentIndex],
-
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: currentIndex,
-
-        onTap: (index) {
-          setState(() {
-            currentIndex = index;
-          });
-        },
-
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-          BottomNavigationBarItem(icon: Icon(Icons.search), label: "Search"),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
-        ],
+      appBar: AppBar(
+        title: const Text("Shared Preferences"),
       ),
-    );
-  }
-}
 
-class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+      body: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          children: [
+            TextField(
+              controller: nameController,
+              decoration: const InputDecoration(
+                labelText: "Enter your name",
+                border: OutlineInputBorder(),
+              ),
+            ),
 
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Text("Home Page", style: TextStyle(fontSize: 30)),
-    );
-  }
-}
+            const SizedBox(height: 20,),
 
-class SearchPage extends StatelessWidget {
-  const SearchPage({super.key});
+            ElevatedButton(onPressed: saveName, child: const Text("Save name"),),
+            const SizedBox(height: 30,),
 
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Text("Search Page", style: TextStyle(fontSize: 30)),
-    );
-  }
-}
+            Text(
+              "Hello $username",
+              style: const TextStyle(
+                fontSize: 25,
+              ),
+            )
 
-class ProfilePage extends StatelessWidget {
-  const ProfilePage({super.key});
 
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Text("Profile Page", style: TextStyle(fontSize: 30)),
-    );
+          ],
+        ),
+        
+        
+        
+        ),
+    )   ; 
   }
 }
