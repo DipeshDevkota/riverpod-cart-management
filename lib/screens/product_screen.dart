@@ -17,6 +17,7 @@ class ProductScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context,WidgetRef ref) {
+    final cart = ref.watch(cartProvider);
     return Scaffold(
       appBar: AppBar(title: const Text("Products"),
       actions: [
