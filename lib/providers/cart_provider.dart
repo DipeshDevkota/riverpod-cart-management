@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../models/product.dart';
+import '../domain/entities/product.dart';
 import '../models/cart_item.dart';
 
 class CartNotifier extends Notifier<List<CartItem>> {

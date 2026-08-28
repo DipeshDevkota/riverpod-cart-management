@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutterproj/screens/cart_screen.dart';
 
-import '../models/product.dart';
+import '../domain/entities/product.dart';
 import '../providers/cart_provider.dart';
 
 class ProductScreen extends ConsumerWidget {

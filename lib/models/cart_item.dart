@@ -1,4 +1,4 @@
-import 'product.dart';
+import '../domain/entities/product.dart';
 
 class CartItem {
     
