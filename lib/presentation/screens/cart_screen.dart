@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:provider/provider.dart';
 
 import '../providers/cart_provider.dart';
 
-class CartScreen extends ConsumerWidget {
+class CartScreen extends StatelessWidget {
   const CartScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final cart = ref.watch(cartProvider);
+  Widget build(BuildContext context) {
+    final cartProvider = context.watch<CartProvider>();
+    final cart = cartProvider.cart;
 
     double totalPrice = 0;
 
@@ -17,16 +18,11 @@ class CartScreen extends ConsumerWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("My Cart"),
-      ),
+      appBar: AppBar(title: const Text("My Cart")),
 
       body: cart.isEmpty
           ? const Center(
-              child: Text(
-                "Your cart is empty",
-                style: TextStyle(fontSize: 20),
-              ),
+              child: Text("Your cart is empty", style: TextStyle(fontSize: 20)),
             )
           : Column(
               children: [
@@ -39,43 +35,33 @@ class CartScreen extends ConsumerWidget {
                       return ListTile(
                         title: Text(item.product.name),
 
-                        subtitle: Text(
-                          "Rs. ${item.product.price}",
-                        ),
+                        subtitle: Text("Rs. ${item.product.price}"),
 
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             IconButton(
                               onPressed: () {
-                                ref
-                                    .read(cartProvider.notifier)
-                                    .decrement(item.product);
+                                cartProvider.decrement(item.product);
                               },
                               icon: const Icon(Icons.remove),
                             ),
 
                             Text(
                               "${item.quantity}",
-                              style: const TextStyle(
-                                fontSize: 18,
-                              ),
+                              style: const TextStyle(fontSize: 18),
                             ),
 
                             IconButton(
                               onPressed: () {
-                                ref
-                                    .read(cartProvider.notifier)
-                                    .increment(item.product);
+                                cartProvider.increment(item.product);
                               },
                               icon: const Icon(Icons.add),
                             ),
 
                             IconButton(
                               onPressed: () {
-                                ref
-                                    .read(cartProvider.notifier)
-                                    .removeFromCart(item.product);
+                                cartProvider.removeFromCart(item.product);
                               },
                               icon: const Icon(Icons.delete),
                             ),

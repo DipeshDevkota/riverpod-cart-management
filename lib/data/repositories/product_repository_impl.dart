@@ -3,13 +3,12 @@ import '../../domain/repositories/product_repository.dart';
 import '../datasources/product_datasource.dart';
 
 class ProductRepositoryImpl implements ProductRepository {
-  final ProductDataSource dataSource;
+  final ProductDataSource productDataSource;
 
-  ProductRepositoryImpl(this.dataSource);
+  ProductRepositoryImpl(this.productDataSource);
 
   @override
-  Future<List<Product>> getProducts()
-  {
-    return dataSource.getProducts();
+  Future<List<Product>> getProducts() {
+    return productDataSource.getProducts();
   }
 }

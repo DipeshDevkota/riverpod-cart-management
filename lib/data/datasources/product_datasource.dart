@@ -1,7 +1,7 @@
 import 'dart:convert';
 
-import 'package:flutterproj/models/product_model.dart';
 import 'package:flutter/services.dart';
+import 'package:flutterproj/data/models/product_model.dart';
 
 class ProductDataSource{
   Future<List<ProductModel>> getProducts() async{

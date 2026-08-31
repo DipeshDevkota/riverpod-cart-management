@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:provider/provider.dart';
 
-import 'screens/product_screen.dart';
+import 'presentation/providers/cart_provider.dart';
+import 'presentation/providers/product_provider.dart';
+import 'presentation/screens/product_screen.dart';
 
-void main()
-{
+void main() {
   runApp(
-    const ProviderScope(
-    child: MyApp(),
-   ),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => ProductProvider()),
+        ChangeNotifierProvider(create: (_) => CartProvider()),
+      ],
+      child: const MyApp(),
+    ),
   );
 }
 
@@ -17,9 +22,9 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-     return MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: ProductScreen(),
-     );    
+      home: const ProductScreen(),
+    );
   }
 }
