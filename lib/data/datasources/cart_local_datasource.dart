@@ -9,7 +9,7 @@ class CartLocalDataSource {
 
     final jsonString = jsonEncode(cart);
     await prefs.setString(cartKey, jsonString);
-    print("This is json string $jsonString");
+    // print("This is json string $jsonString");
   }
 
   Future<List<Map<String, dynamic>>> getCart() async {
@@ -21,7 +21,6 @@ class CartLocalDataSource {
     }
 
     final decodedData = jsonDecode(jsonString) as List;
-    print(decodedData);
 
     return decodedData
         .map((item) => Map<String, dynamic>.from(item as Map))

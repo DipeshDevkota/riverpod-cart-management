@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutterproj/data/datasources/cart_local_datasource.dart';
 import 'package:flutterproj/data/repositories/cart_repository_impl.dart';
 import 'package:flutterproj/domain/repositories/cart_repository.dart';
@@ -6,31 +6,17 @@ import 'package:flutterproj/domain/repositories/cart_repository.dart';
 import '../../domain/entities/cart_item.dart';
 import '../../domain/entities/product.dart';
 
-class CartProvider extends ChangeNotifier {
-  CartProvider({CartRepository? cartRepository})
-    : cartRepository =
-          cartRepository ?? CartRepositoryImpl(CartLocalDataSource());
+class CartNotifier extends Notifier<List<CartItem>> {
+  late final CartRepository cartRepository;
 
-  final CartRepository cartRepository;
-  List<CartItem> cart = [];
-
-  Future<void> saveCart() async {
-    final cartData = cart
-        .map(
-          (item) => {
-            'productId': item.product.id,
-            'quantity': item.quantity,
-            'name': item.product.name,
-            'price': item.product.price,
-            'image': item.product.image,
-          },
-        )
-        .toList();
-
-    await cartRepository.saveCart(cartData);
+  @override
+  List<CartItem> build() {
+    cartRepository = CartRepositoryImpl(CartLocalDataSource());
+    _loadCart();
+    return [];
   }
 
-  Future<void> loadCart() async {
+  Future<void> _loadCart() async {
     final savedCart = await cartRepository.getCart();
     final restoredCart = <CartItem>[];
 
@@ -51,46 +37,59 @@ class CartProvider extends ChangeNotifier {
       restoredCart.add(CartItem(product: product, quantity: quantity));
     }
 
-    cart = restoredCart;
-    notifyListeners();
+    state = restoredCart;
+  }
+
+  Future<void> _saveCart() async {
+    final cartData = state
+        .map(
+          (item) => {
+            'productId': item.product.id,
+            'quantity': item.quantity,
+            'name': item.product.name,
+            'price': item.product.price,
+            'image': item.product.image,
+          },
+        )
+        .toList();
+
+    await cartRepository.saveCart(cartData);
   }
 
   void addToCart(Product product) {
-    final index = cart.indexWhere((item) => item.product.id == product.id);
+    final index = state.indexWhere((item) => item.product.id == product.id);
 
     if (index != -1) {
-      final newCart = [...cart];
+      final newCart = [...state];
       newCart[index] = newCart[index].copyWith(
         quantity: newCart[index].quantity + 1,
       );
-      cart = newCart;
+      state = newCart;
     } else {
-      cart = [...cart, CartItem(product: product)];
+      state = [...state, CartItem(product: product)];
     }
 
-    notifyListeners();
-    saveCart();
+    _saveCart();
   }
 
   void increment(Product product) {
-    final index = cart.indexWhere((item) => item.product.id == product.id);
+    final index = state.indexWhere((item) => item.product.id == product.id);
 
     if (index != -1) {
-      final newCart = [...cart];
+      final newCart = [...state];
       newCart[index] = newCart[index].copyWith(
         quantity: newCart[index].quantity + 1,
       );
-      cart = newCart;
-      notifyListeners();
-      saveCart();
+      state = newCart;
+      _saveCart();
     }
   }
 
   void decrement(Product product) {
-    final index = cart.indexWhere((item) => item.product.id == product.id);
+    final index = state.indexWhere((item) => item.product.id == product.id);
 
     if (index != -1) {
-      final newCart = [...cart];
+      final newCart = [...state];
 
       if (newCart[index].quantity > 1) {
         newCart[index] = newCart[index].copyWith(
@@ -100,15 +99,17 @@ class CartProvider extends ChangeNotifier {
         newCart.removeAt(index);
       }
 
-      cart = newCart;
-      notifyListeners();
-      saveCart();
+      state = newCart;
+      _saveCart();
     }
   }
 
   void removeFromCart(Product product) {
-    cart = cart.where((item) => item.product.id != product.id).toList();
-    notifyListeners();
-    saveCart();
+    state = state.where((item) => item.product.id != product.id).toList();
+    _saveCart();
   }
 }
+
+final cartNotifierProvider = NotifierProvider<CartNotifier, List<CartItem>>(
+  CartNotifier.new,
+);

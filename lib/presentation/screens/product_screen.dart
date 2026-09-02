@@ -1,34 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:provider/provider.dart';
 import 'package:flutterproj/presentation/screens/cart_screen.dart';
 
-import '../providers/cart_provider.dart';
+import 'package:flutterproj/presentation/providers/cart_notifier.dart';
+import 'package:flutterproj/presentation/providers/cart_summary_provider.dart';
 import '../providers/product_provider.dart';
 
-class ProductScreen extends StatefulWidget {
+class ProductScreen extends ConsumerWidget {
   const ProductScreen({super.key});
 
   @override
-  State<ProductScreen> createState() => _ProductScreenState();
-}
-
-class _ProductScreenState extends State<ProductScreen> {
-  @override
-  void initState() {
-    context.read<CartProvider>().loadCart();
-
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final productProvider = context.watch<ProductProvider>();
-    final cart = context.watch<CartProvider>().cart;
-    int cartCount = 0;
-
-    for (final item in cart) {
-      cartCount += item.quantity;
-    }
+    final cartCount = context.watch<CartSummaryProvider>().cartCount;
 
     return Scaffold(
       appBar: AppBar(
@@ -96,7 +81,9 @@ class _ProductScreenState extends State<ProductScreen> {
 
                   trailing: ElevatedButton(
                     onPressed: () {
-                      context.read<CartProvider>().addToCart(product);
+                      ref
+                          .read(cartNotifierProvider.notifier)
+                          .addToCart(product);
 
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text("Item added to cart")),

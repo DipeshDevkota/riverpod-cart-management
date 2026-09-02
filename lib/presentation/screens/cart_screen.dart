@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:provider/provider.dart';
 
-import '../providers/cart_provider.dart';
+import 'package:flutterproj/presentation/providers/cart_notifier.dart';
+import 'package:flutterproj/presentation/providers/cart_summary_provider.dart';
 
-class CartScreen extends StatelessWidget {
+class CartScreen extends ConsumerWidget {
   const CartScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final cartProvider = context.watch<CartProvider>();
-    final cart = cartProvider.cart;
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Core cart items live in Riverpod.
+    final cart = ref.watch(cartNotifierProvider);
+    final cartNotifier = ref.read(cartNotifierProvider.notifier);
 
-    double totalPrice = 0;
-
-    for (final item in cart) {
-      totalPrice += item.product.price * item.quantity;
-    }
+    // Derived total lives in the plain provider package.
+    final totalPrice = context.watch<CartSummaryProvider>().totalPrice;
 
     return Scaffold(
       appBar: AppBar(title: const Text("My Cart")),
@@ -42,7 +42,7 @@ class CartScreen extends StatelessWidget {
                           children: [
                             IconButton(
                               onPressed: () {
-                                cartProvider.decrement(item.product);
+                                cartNotifier.decrement(item.product);
                               },
                               icon: const Icon(Icons.remove),
                             ),
@@ -54,14 +54,14 @@ class CartScreen extends StatelessWidget {
 
                             IconButton(
                               onPressed: () {
-                                cartProvider.increment(item.product);
+                                cartNotifier.increment(item.product);
                               },
                               icon: const Icon(Icons.add),
                             ),
 
                             IconButton(
                               onPressed: () {
-                                cartProvider.removeFromCart(item.product);
+                                cartNotifier.removeFromCart(item.product);
                               },
                               icon: const Icon(Icons.delete),
                             ),
