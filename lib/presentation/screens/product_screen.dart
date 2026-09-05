@@ -1,19 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:provider/provider.dart';
 import 'package:flutterproj/presentation/screens/cart_screen.dart';
 
 import 'package:flutterproj/presentation/providers/cart_notifier.dart';
 import 'package:flutterproj/presentation/providers/cart_summary_provider.dart';
-import '../providers/product_provider.dart';
+import 'package:flutterproj/presentation/providers/product_notifier.dart';
 
 class ProductScreen extends ConsumerWidget {
   const ProductScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final productProvider = context.watch<ProductProvider>();
-    final cartCount = context.watch<CartSummaryProvider>().cartCount;
+    final productsAsync = ref.watch(productNotifierProvider);
+    final cartCount = ref.watch(cartCountProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -57,44 +56,43 @@ class ProductScreen extends ConsumerWidget {
         ],
       ),
 
-      body: productProvider.isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : productProvider.errorMessage != null
-          ? Center(child: Text(productProvider.errorMessage!))
-          : ListView.builder(
-              itemCount: productProvider.products.length,
+      body: productsAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stackTrace) =>
+            const Center(child: Text("Unable to load products.")),
+        data: (products) => ListView.builder(
+          itemCount: products.length,
 
-              itemBuilder: (context, index) {
-                final product = productProvider.products[index];
+          itemBuilder: (context, index) {
+            final product = products[index];
 
-                return ListTile(
-                  leading: Image.asset(
-                    product.image,
-                    width: 56,
-                    height: 56,
-                    fit: BoxFit.cover,
-                  ),
+            return ListTile(
+              leading: Image.asset(
+                product.image,
+                width: 56,
+                height: 56,
+                fit: BoxFit.cover,
+              ),
 
-                  title: Text(product.name),
+              title: Text(product.name),
 
-                  subtitle: Text("Rs. ${product.price}"),
+              subtitle: Text("Rs. ${product.price}"),
 
-                  trailing: ElevatedButton(
-                    onPressed: () {
-                      ref
-                          .read(cartNotifierProvider.notifier)
-                          .addToCart(product);
+              trailing: ElevatedButton(
+                onPressed: () {
+                  ref.read(cartNotifierProvider.notifier).addToCart(product);
 
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("Item added to cart")),
-                      );
-                    },
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Item added to cart")),
+                  );
+                },
 
-                    child: const Text("Add to Cart"),
-                  ),
-                );
-              },
-            ),
+                child: const Text("Add to Cart"),
+              ),
+            );
+          },
+        ),
+      ),
     );
   }
 }

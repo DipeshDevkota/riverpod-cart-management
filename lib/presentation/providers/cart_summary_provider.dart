@@ -1,22 +1,16 @@
-import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../domain/entities/cart_item.dart';
+import 'cart_notifier.dart';
 
-class CartSummaryProvider extends ChangeNotifier {
-  int cartCount = 0;
-  double totalPrice = 0;
+final cartCountProvider = Provider<int>((ref) {
+  final cart = ref.watch(cartNotifierProvider).value ?? [];
+  return cart.fold<int>(0, (sum, item) => sum + item.quantity);
+});
 
-  void update(List<CartItem> cart) {
-    final newCount = cart.fold<int>(0, (sum, item) => sum + item.quantity);
-    final newTotal = cart.fold<double>(
-      0,
-      (sum, item) => sum + (item.product.price * item.quantity),
-    );
-
-    if (newCount != cartCount || newTotal != totalPrice) {
-      cartCount = newCount;
-      totalPrice = newTotal;
-      notifyListeners();
-    }
-  }
-}
+final totalPriceProvider = Provider<double>((ref) {
+  final cart = ref.watch(cartNotifierProvider).value ?? [];
+  return cart.fold<double>(
+    0,
+    (sum, item) => sum + (item.product.price * item.quantity),
+  );
+});

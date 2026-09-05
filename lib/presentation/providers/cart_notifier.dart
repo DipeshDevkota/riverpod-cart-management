@@ -6,17 +6,16 @@ import 'package:flutterproj/domain/repositories/cart_repository.dart';
 import '../../domain/entities/cart_item.dart';
 import '../../domain/entities/product.dart';
 
-class CartNotifier extends Notifier<List<CartItem>> {
+class CartNotifier extends AsyncNotifier<List<CartItem>> {
   late final CartRepository cartRepository;
 
   @override
-  List<CartItem> build() {
+  Future<List<CartItem>> build() async {
     cartRepository = CartRepositoryImpl(CartLocalDataSource());
-    _loadCart();
-    return [];
+    return _loadCart();
   }
 
-  Future<void> _loadCart() async {
+  Future<List<CartItem>> _loadCart() async {
     final savedCart = await cartRepository.getCart();
     final restoredCart = <CartItem>[];
 
@@ -37,11 +36,11 @@ class CartNotifier extends Notifier<List<CartItem>> {
       restoredCart.add(CartItem(product: product, quantity: quantity));
     }
 
-    state = restoredCart;
+    return restoredCart;
   }
 
-  Future<void> _saveCart() async {
-    final cartData = state
+  Future<void> _saveCart(List<CartItem> cart) async {
+    final cartData = cart
         .map(
           (item) => {
             'productId': item.product.id,
@@ -57,59 +56,65 @@ class CartNotifier extends Notifier<List<CartItem>> {
   }
 
   void addToCart(Product product) {
-    final index = state.indexWhere((item) => item.product.id == product.id);
+    final current = state.value ?? [];
+    final index = current.indexWhere((item) => item.product.id == product.id);
 
+    List<CartItem> newCart;
     if (index != -1) {
-      final newCart = [...state];
+      newCart = [...current];
       newCart[index] = newCart[index].copyWith(
         quantity: newCart[index].quantity + 1,
       );
-      state = newCart;
     } else {
-      state = [...state, CartItem(product: product)];
+      newCart = [...current, CartItem(product: product)];
     }
 
-    _saveCart();
+    state = AsyncData(newCart);
+    _saveCart(newCart);
   }
 
   void increment(Product product) {
-    final index = state.indexWhere((item) => item.product.id == product.id);
+    final current = state.value ?? [];
+    final index = current.indexWhere((item) => item.product.id == product.id);
+    if (index == -1) return;
 
-    if (index != -1) {
-      final newCart = [...state];
-      newCart[index] = newCart[index].copyWith(
-        quantity: newCart[index].quantity + 1,
-      );
-      state = newCart;
-      _saveCart();
-    }
+    final newCart = [...current];
+    newCart[index] = newCart[index].copyWith(
+      quantity: newCart[index].quantity + 1,
+    );
+
+    state = AsyncData(newCart);
+    _saveCart(newCart);
   }
 
   void decrement(Product product) {
-    final index = state.indexWhere((item) => item.product.id == product.id);
+    final current = state.value ?? [];
+    final index = current.indexWhere((item) => item.product.id == product.id);
+    if (index == -1) return;
 
-    if (index != -1) {
-      final newCart = [...state];
-
-      if (newCart[index].quantity > 1) {
-        newCart[index] = newCart[index].copyWith(
-          quantity: newCart[index].quantity - 1,
-        );
-      } else {
-        newCart.removeAt(index);
-      }
-
-      state = newCart;
-      _saveCart();
+    final newCart = [...current];
+    if (newCart[index].quantity > 1) {
+      newCart[index] = newCart[index].copyWith(
+        quantity: newCart[index].quantity - 1,
+      );
+    } else {
+      newCart.removeAt(index);
     }
+
+    state = AsyncData(newCart);
+    _saveCart(newCart);
   }
 
   void removeFromCart(Product product) {
-    state = state.where((item) => item.product.id != product.id).toList();
-    _saveCart();
+    final current = state.value ?? [];
+    final newCart = current
+        .where((item) => item.product.id != product.id)
+        .toList();
+
+    state = AsyncData(newCart);
+    _saveCart(newCart);
   }
 }
 
-final cartNotifierProvider = NotifierProvider<CartNotifier, List<CartItem>>(
-  CartNotifier.new,
-);
+final cartNotifierProvider =
+    AsyncNotifierProvider<CartNotifier, List<CartItem>>(CartNotifier.new);
